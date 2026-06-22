@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BOMBERMAN ONLINE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="scanlines"></div>
+  <div id="app">
+    <div id="screen-menu"   class="screen"></div>
+    <div id="screen-char"   class="screen hidden"></div>
+    <div id="screen-lobby"  class="screen hidden"></div>
+    <div id="screen-room"   class="screen hidden"></div>
+    <div id="screen-game"   class="screen hidden" style="position:relative;overflow:hidden;"></div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/character/renderer.js?v=2"></script>
+  <script src="js/game/mapRenderer.js"></script>
+  <script src="js/game/engine.js"></script>
+  <script src="js/socket.js"></script>
+  <script src="js/screens/menu.js"></script>
+  <script src="js/screens/character.js"></script>
+  <script src="js/screens/lobby.js"></script>
+  <script src="js/screens/room.js"></script>
+  <script src="js/screens/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
