@@ -80,7 +80,44 @@ const App = (() => {
     show('menu');
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  // ── Fullscreen ────────────────────────────────────────────────────────────
+  function requestFullscreen() {
+    const el = document.documentElement;
+    const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (fn) fn.call(el).catch(() => {});
+  }
 
-  return { show, toast, state, saveLocal };
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+  }
+
+  // Tenta fullscreen no primeiro toque/clique do usuário
+  function tryFullscreenOnInteraction() {
+    if (isFullscreen()) return;
+    requestFullscreen();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    init();
+
+    // Primeiro gesto do usuário → entra em fullscreen
+    const once = { once: true };
+    document.addEventListener('click',      tryFullscreenOnInteraction, once);
+    document.addEventListener('touchstart', tryFullscreenOnInteraction, once);
+    document.addEventListener('keydown',    tryFullscreenOnInteraction, once);
+
+    // Se saiu do fullscreen manualmente, tenta de novo no próximo clique
+    document.addEventListener('fullscreenchange',       onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
+  });
+
+  function onFsChange() {
+    if (!isFullscreen()) {
+      // saiu do fullscreen — recoloca no próximo clique
+      document.addEventListener('click',      tryFullscreenOnInteraction, { once: true });
+      document.addEventListener('touchstart', tryFullscreenOnInteraction, { once: true });
+    }
+  }
+
+  return { show, toast, state, saveLocal, requestFullscreen };
 })();
