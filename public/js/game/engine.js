@@ -34,16 +34,15 @@ const GameEngine = (() => {
   // ── Tile size dinâmico ────────────────────────────────────────────────────
   function getJoyCtrlH() {
     if (!isMobileDevice()) return 0;
-    // proporcional à altura: 22% da tela, mínimo 120px, máximo 180px
-    return Math.max(120, Math.min(180, Math.floor(window.innerHeight * 0.22)));
+    return Math.floor(window.innerHeight * 0.23); // 23% da altura — sem min/max fixo
   }
 
   function getTileSize() {
     const hudH = 44;
     const maxW = window.innerWidth;
     const maxH = window.innerHeight - hudH - getJoyCtrlH();
-    const ts   = Math.floor(Math.min(maxW / GRID_W, maxH / GRID_H));
-    return Math.max(12, Math.min(ts, 48));
+    // sem clamp fixo — adapta a qualquer tamanho de tela
+    return Math.max(1, Math.floor(Math.min(maxW / GRID_W, maxH / GRID_H)));
   }
 
   // ── Cache de sprites ──────────────────────────────────────────────────────
@@ -336,20 +335,24 @@ const GameEngine = (() => {
     const me = state.players.find(p => p.id === myId);
     if (!me) return;
 
-    // Barra de status do jogador
-    const bx = 10, by = H - 44;
-    ctx.fillStyle = 'rgba(7,7,15,0.8)';
-    ctx.fillRect(bx, by, 200, 36);
+    const fs  = Math.max(6, Math.floor(W * 0.018)); // fonte proporcional
+    const bh  = fs * 4.4;
+    const bw  = fs * 22;
+    const bx  = W * 0.01;
+    const by  = H - getJoyCtrlH() - bh - H * 0.01;
+
+    ctx.fillStyle = 'rgba(7,7,15,0.82)';
+    ctx.fillRect(bx, by, bw, bh);
     ctx.strokeStyle = '#2a2a5a';
     ctx.lineWidth = 1;
-    ctx.strokeRect(bx, by, 200, 36);
+    ctx.strokeRect(bx, by, bw, bh);
 
     ctx.fillStyle = '#ffcc00';
-    ctx.font = '7px "Press Start 2P", monospace';
+    ctx.font = `${fs}px "Press Start 2P", monospace`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`💣 ${me.bombs||1} bombas  💥 ${me.range||2} alcance`, bx+8, by+12);
-    ctx.fillText(`🏆 ${me.kills||0} eliminações`, bx+8, by+26);
+    ctx.fillText(`💣 ${me.bombs||1} bombas  💥 ${me.range||2} alcance`, bx + fs*0.8, by + bh*0.3);
+    ctx.fillText(`🏆 ${me.kills||0} eliminações`, bx + fs*0.8, by + bh*0.72);
   }
 
   // ── Controles Mobile ──────────────────────────────────────────────────────
@@ -357,31 +360,23 @@ const GameEngine = (() => {
     return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   }
 
-  function joyR() {
-    const minDim = Math.min(canvas.width, canvas.height);
-    return Math.max(40, Math.min(58, minDim * 0.13));
-  }
-  function btnR() {
-    const minDim = Math.min(canvas.width, canvas.height);
-    return Math.max(32, Math.min(46, minDim * 0.10));
-  }
+  // tamanhos 100% proporcionais ao canvas — sem min/max fixo
+  function joyR()  { return canvas.width * 0.13; }
+  function btnR()  { return canvas.width * 0.09; }
 
-  function ctrlBaseY() {
-    // base Y dos controles: fundo da área de controle
-    return canvas.height - 18;
-  }
+  function ctrlBaseY() { return canvas.height - canvas.height * 0.02; }
 
   function joyDefault() {
     const r = joyR();
-    return { x: r + 22, y: ctrlBaseY() - r };
+    return { x: r + canvas.width * 0.04, y: ctrlBaseY() - r };
   }
   function bombPos() {
     const r = btnR();
-    return { x: canvas.width - r - 20, y: ctrlBaseY() - r };
+    return { x: canvas.width - r - canvas.width * 0.04, y: ctrlBaseY() - r };
   }
   function sprintPos() {
     const r = btnR() * 0.68;
-    return { x: canvas.width - btnR()*2 - 46, y: ctrlBaseY() - r - btnR()*0.4 };
+    return { x: canvas.width - btnR()*2 - canvas.width*0.1, y: ctrlBaseY() - r - btnR()*0.5 };
   }
 
   function drawMobileControls(now) {
