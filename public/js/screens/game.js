@@ -10,8 +10,8 @@ const GameScreen = (() => {
       <div id="game-hud" style="
         position:absolute;top:0;left:0;right:0;z-index:100;pointer-events:none;
         display:flex;justify-content:space-between;align-items:center;
-        padding:6px 14px;background:rgba(7,7,15,0.88);border-bottom:2px solid #2a2a5a;
-        height:48px;
+        padding:4px 10px;background:rgba(7,7,15,0.92);border-bottom:2px solid #2a2a5a;
+        height:44px;box-sizing:border-box;
       ">
         <div style="display:flex;gap:12px;align-items:center;">
           <span style="font-size:9px;color:#ffcc00;">💣</span>

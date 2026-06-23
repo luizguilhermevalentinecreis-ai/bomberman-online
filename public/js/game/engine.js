@@ -20,7 +20,7 @@ const GameEngine = (() => {
     active: false, touchId: null,
     baseX: 0, baseY: 0,
     dx: 0, dy: 0,
-    radius: 55,
+    sprint: false,
   };
   let bombTouch = false;
   let bombTouchId = null;
@@ -32,12 +32,18 @@ const GameEngine = (() => {
   const GRID_H = 17;
 
   // ── Tile size dinâmico ────────────────────────────────────────────────────
+  function getJoyCtrlH() {
+    if (!isMobileDevice()) return 0;
+    // proporcional à altura: 22% da tela, mínimo 120px, máximo 180px
+    return Math.max(120, Math.min(180, Math.floor(window.innerHeight * 0.22)));
+  }
+
   function getTileSize() {
-    const hudH = 52;
+    const hudH = 44;
     const maxW = window.innerWidth;
-    const maxH = window.innerHeight - hudH;
+    const maxH = window.innerHeight - hudH - getJoyCtrlH();
     const ts   = Math.floor(Math.min(maxW / GRID_W, maxH / GRID_H));
-    return Math.max(20, Math.min(ts, 48));
+    return Math.max(12, Math.min(ts, 48));
   }
 
   // ── Cache de sprites ──────────────────────────────────────────────────────
@@ -351,58 +357,113 @@ const GameEngine = (() => {
     return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   }
 
+  function joyR() {
+    const minDim = Math.min(canvas.width, canvas.height);
+    return Math.max(40, Math.min(58, minDim * 0.13));
+  }
+  function btnR() {
+    const minDim = Math.min(canvas.width, canvas.height);
+    return Math.max(32, Math.min(46, minDim * 0.10));
+  }
+
+  function ctrlBaseY() {
+    // base Y dos controles: fundo da área de controle
+    return canvas.height - 18;
+  }
+
+  function joyDefault() {
+    const r = joyR();
+    return { x: r + 22, y: ctrlBaseY() - r };
+  }
+  function bombPos() {
+    const r = btnR();
+    return { x: canvas.width - r - 20, y: ctrlBaseY() - r };
+  }
+  function sprintPos() {
+    const r = btnR() * 0.68;
+    return { x: canvas.width - btnR()*2 - 46, y: ctrlBaseY() - r - btnR()*0.4 };
+  }
+
   function drawMobileControls(now) {
     if (!isMobileDevice()) return;
     const W = canvas.width, H = canvas.height;
-
-    // Joystick base (esquerda)
-    const jbx = 90, jby = H - 110;
-    const alpha = joy.active ? 0.7 : 0.4;
+    const r  = joyR();
+    const br = btnR();
 
     ctx.save();
-    ctx.globalAlpha = alpha;
+    ctx.imageSmoothingEnabled = true;
 
-    // Base
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.beginPath(); ctx.arc(jbx, jby, joy.radius, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(jbx, jby, joy.radius, 0, Math.PI*2); ctx.stroke();
+    // ── Joystick ──
+    const jx = joy.active ? joy.baseX : joyDefault().x;
+    const jy = joy.active ? joy.baseY : joyDefault().y;
+    const jAlpha = joy.active ? 0.82 : 0.38;
 
-    // Setas diagonais
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.font = '14px sans-serif';
+    // Base ring
+    ctx.globalAlpha = jAlpha;
+    ctx.fillStyle = 'rgba(20,20,50,0.55)';
+    ctx.beginPath(); ctx.arc(jx, jy, r, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(jx, jy, r, 0, Math.PI*2); ctx.stroke();
+
+    // Inner ring
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(jx, jy, r * 0.45, 0, Math.PI*2); ctx.stroke();
+
+    // Arrow hints
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = `${Math.round(r*0.38)}px sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('↑', jbx,         jby - joy.radius*0.6);
-    ctx.fillText('↓', jbx,         jby + joy.radius*0.6);
-    ctx.fillText('←', jbx - joy.radius*0.6, jby);
-    ctx.fillText('→', jbx + joy.radius*0.6, jby);
+    ctx.fillText('▲', jx,       jy - r*0.72);
+    ctx.fillText('▼', jx,       jy + r*0.72);
+    ctx.fillText('◀', jx - r*0.72, jy);
+    ctx.fillText('▶', jx + r*0.72, jy);
 
     // Handle
-    const hx = joy.active ? jbx + joy.dx * joy.radius : jbx;
-    const hy = joy.active ? jby + joy.dy * joy.radius : jby;
-    ctx.fillStyle = 'rgba(255,85,51,0.85)';
-    ctx.beginPath(); ctx.arc(hx, hy, joy.radius*0.38, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(hx, hy, joy.radius*0.38, 0, Math.PI*2); ctx.stroke();
+    const hx = joy.active ? jx + joy.dx * r : jx;
+    const hy = joy.active ? jy + joy.dy * r : jy;
+    const hr = r * 0.40;
 
-    // Botão de bomba (direita)
-    const bbx = W - 80, bby = H - 100;
-    const bombPulse = bombTouch ? 1 : (0.7 + 0.2*Math.sin(now/300));
-    ctx.globalAlpha = bombPulse * 0.85;
-    ctx.fillStyle = bombTouch ? '#ff2200' : '#cc4400';
-    ctx.beginPath(); ctx.arc(bbx, bby, 42, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    const grd = ctx.createRadialGradient(hx - hr*0.3, hy - hr*0.3, 1, hx, hy, hr);
+    grd.addColorStop(0, '#ff8866');
+    grd.addColorStop(1, '#cc2200');
+    ctx.fillStyle = grd;
+    ctx.beginPath(); ctx.arc(hx, hy, hr, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
     ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(bbx, bby, 42, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(hx, hy, hr, 0, Math.PI*2); ctx.stroke();
+
+    // ── Botão SPRINT (meio-direita, menor) ──
+    const sp = sprintPos();
+    const sr = btnR() * 0.72;
+    ctx.globalAlpha = joy.sprint ? 0.95 : 0.45;
+    ctx.fillStyle = joy.sprint ? '#22aaff' : 'rgba(30,30,80,0.7)';
+    ctx.beginPath(); ctx.arc(sp.x, sp.y, sr, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = joy.sprint ? '#88ddff' : 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(sp.x, sp.y, sr, 0, Math.PI*2); ctx.stroke();
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold 28px sans-serif';
+    ctx.font = `bold ${Math.round(sr*0.7)}px sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('💣', bbx, bby);
-    ctx.fillStyle = '#ffcc00';
-    ctx.font = '7px "Press Start 2P", monospace';
-    ctx.fillText('BOMBA', bbx, bby + 52);
+    ctx.fillText('⚡', sp.x, sp.y);
+
+    // ── Botão BOMBA ──
+    const bp = bombPos();
+    const pulse = bombTouch ? 1.08 : (1 + 0.05*Math.sin(now/280));
+    ctx.globalAlpha = bombTouch ? 0.98 : 0.82;
+    const bg = ctx.createRadialGradient(bp.x - br*0.3, bp.y - br*0.3, 2, bp.x, bp.y, br*pulse);
+    bg.addColorStop(0, bombTouch ? '#ff5500' : '#992200');
+    bg.addColorStop(1, bombTouch ? '#cc2200' : '#440800');
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.arc(bp.x, bp.y, br*pulse, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = bombTouch ? '#ffaa00' : 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(bp.x, bp.y, br*pulse, 0, Math.PI*2); ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${Math.round(br*0.72)}px sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('💣', bp.x, bp.y);
 
     ctx.restore();
   }
@@ -437,32 +498,31 @@ const GameEngine = (() => {
     canvas.removeEventListener('touchcancel', onTouchEnd);
   }
 
-  function joyBase() {
-    // Centro do joystick na tela
-    return { x: 90, y: canvas.height - 110 };
-  }
-  function bombCenter() {
-    return { x: canvas.width - 80, y: canvas.height - 100 };
-  }
+  let sprintTouchId = null;
 
   function onTouchStart(e) {
     e.preventDefault();
     Array.from(e.changedTouches).forEach(t => {
       const tx = t.clientX, ty = t.clientY;
-      const bc = bombCenter();
-      const dist = Math.hypot(tx - bc.x, ty - bc.y);
-      if (dist < 60) {
-        // Botão de bomba
-        bombTouch = true;
-        bombTouchId = t.identifier;
-        return;
+
+      // Bomba
+      const bp = bombPos();
+      if (Math.hypot(tx - bp.x, ty - bp.y) < btnR() + 16) {
+        bombTouch = true; bombTouchId = t.identifier; return;
       }
-      // Joystick — qualquer toque na metade esquerda da tela
-      if (tx < canvas.width / 2 && !joy.active) {
+      // Sprint
+      const sp = sprintPos();
+      if (Math.hypot(tx - sp.x, ty - sp.y) < btnR() * 0.72 + 14) {
+        joy.sprint = true; sprintTouchId = t.identifier; return;
+      }
+      // Joystick — metade esquerda da tela
+      if (tx < canvas.width * 0.55 && !joy.active) {
         joy.active  = true;
         joy.touchId = t.identifier;
-        joy.baseX   = tx;
-        joy.baseY   = ty;
+        // Joystick flutuante: ancora no ponto de toque
+        const r = joyR();
+        joy.baseX = Math.max(r + 10, Math.min(canvas.width * 0.5 - 10, tx));
+        joy.baseY = Math.max(r + 10, Math.min(canvas.height - r - 10, ty));
         joy.dx = 0; joy.dy = 0;
       }
     });
@@ -491,6 +551,9 @@ const GameEngine = (() => {
       if (t.identifier === bombTouchId) {
         bombTouch = false; bombTouchId = null;
       }
+      if (t.identifier === sprintTouchId) {
+        joy.sprint = false; sprintTouchId = null;
+      }
     });
   }
 
@@ -509,7 +572,7 @@ const GameEngine = (() => {
       left:   !!(keys['ArrowLeft'] || keys['KeyA'] || jLeft),
       right:  !!(keys['ArrowRight']|| keys['KeyD'] || jRight),
       bomb:   !!(keys['Space'] || keys['KeyZ'] || keys['Enter'] || bombTouch),
-      sprint: !!(keys['ShiftLeft'] || keys['ShiftRight']),
+      sprint: !!(keys['ShiftLeft'] || keys['ShiftRight'] || joy.sprint),
     };
 
     const s = JSON.stringify(inp);

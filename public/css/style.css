@@ -549,7 +549,7 @@ html, body {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   RESPONSIVO / MOBILE
+   JOGO
 ══════════════════════════════════════════════════════════════════════════════ */
 #screen-game {
   background: #07070f;
@@ -565,24 +565,107 @@ html, body {
   height: 100%;
 }
 
-@media (max-width: 700px) {
+/* ════════════════════════════════════════════════════════════════════════════
+   RESPONSIVO — TABLET (≤ 900px)
+══════════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
   .lobby-layout  { flex-direction: column; }
   .lobby-side    { width: 100%; }
   .room-layout   { flex-direction: column; }
   .room-right-col{ width: 100%; }
-  .char-layout   { flex-direction: column; }
-  .char-preview-col { position: static; width: 100%; align-items: center; }
-  .menu-card     { padding: 20px; }
-  .menu-logo-title { font-size: 18px; }
-  .players-grid  { grid-template-columns: repeat(auto-fill, minmax(110px,1fr)); }
-  .options-grid  { grid-template-columns: repeat(auto-fill, minmax(56px,1fr)); }
-  .room-header   { gap: 8px; }
-  .lobby-header  { gap: 8px; }
-  html, body     { font-size: 9px; }
 }
 
+/* ════════════════════════════════════════════════════════════════════════════
+   RESPONSIVO — MOBILE (≤ 640px)
+══════════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  html, body { font-size: 8px; }
+
+  /* Menu */
+  .menu-logo       { margin-bottom: 20px; }
+  .menu-logo-title { font-size: clamp(12px, 4vw, 20px); letter-spacing: 1px; }
+  .menu-logo-sub   { font-size: 6px; letter-spacing: 2px; margin-top: 4px; }
+  .menu-card       { padding: 16px; width: min(340px, 96vw); }
+  .menu-card .field{ margin-bottom: 12px; }
+  .menu-actions    { gap: 8px; margin-top: 14px; }
+  .btn-lg          { font-size: 8px; padding: 11px 12px; }
+  .pixel-bomb      { width: 36px; height: 36px; margin-bottom: 10px; }
+
+  /* Lobby */
+  #screen-lobby   { padding: 8px; }
+  .lobby-header   { margin-bottom: 10px; gap: 6px; }
+  .lobby-header h1{ font-size: 10px; }
+  .lobby-layout   { gap: 10px; }
+  .lobby-side     { width: 100%; }
+  .room-item      { padding: 8px 10px; }
+  .room-item-name { font-size: 7px; }
+  .room-item-meta { font-size: 6px; }
+  .lobby-empty    { padding: 28px 12px; font-size: 7px; }
+
+  /* Sala */
+  #screen-room    { padding: 8px; }
+  .room-header    { margin-bottom: 10px; gap: 6px; }
+  .room-title     { font-size: 9px; }
+  .room-id-display{ font-size: 6px; }
+  .room-layout    { gap: 10px; }
+  .room-right-col { width: 100%; }
+  .players-grid   { grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: 6px; }
+  .player-slot    { padding: 6px; }
+  .player-slot-name { font-size: 6px; }
+  .chat-messages  { height: 100px; }
+  .chat-msg       { font-size: 6px; }
+
+  /* Personagem */
+  #screen-char    { padding: 8px; }
+  .char-layout    { flex-direction: column; gap: 12px; }
+  .char-preview-col { position: static; width: 100%; align-items: center; }
+  .char-preview-box { width: 140px; padding: 12px; }
+  .options-grid   { grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 5px; }
+  .opt-btn span   { font-size: 5px; }
+  .char-section   { margin-bottom: 16px; }
+
+  /* Botões globais */
+  .btn-sm    { font-size: 6px; padding: 5px 8px; }
+  .btn       { font-size: 8px; padding: 9px 12px; }
+  .px-input  { font-size: 7px; padding: 7px 9px; }
+  .section-title { font-size: 7px; letter-spacing: 1px; padding-bottom: 4px; margin-bottom: 8px; }
+  .badge     { font-size: 5px; padding: 2px 3px; }
+  .label     { font-size: 7px; }
+  .toggle-label { font-size: 7px; }
+
+  /* HUD de jogo — compacto */
+  #game-hud {
+    height: 36px !important;
+    padding: 3px 8px !important;
+  }
+  #game-hud span, #game-hud div {
+    font-size: 6px !important;
+  }
+  #hud-timer { font-size: 11px !important; }
+  #game-scoreboard { display: none !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   RESPONSIVO — CELULAR PEQUENO (≤ 420px)
+══════════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 420px) {
-  .menu-logo-title { font-size: 14px; letter-spacing: 2px; }
-  .btn-lg          { font-size: 10px; padding: 12px 16px; }
-  .px-box.menu-card{ padding: 14px; }
+  html, body       { font-size: 7px; }
+  .menu-logo-title { font-size: clamp(10px, 3.5vw, 16px); }
+  .menu-card       { padding: 12px; }
+  .btn-lg          { font-size: 7px; padding: 10px 10px; }
+  .players-grid    { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
+  .options-grid    { grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); }
+  .room-header > div:first-child { flex: 1; min-width: 0; }
+  .room-header > div:last-child  { flex-wrap: wrap; gap: 4px; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   RESPONSIVO — TELA MUITO PEQUENA (≤ 360px)
+══════════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 360px) {
+  html, body       { font-size: 6px; }
+  .menu-logo-title { font-size: 10px; }
+  .menu-card       { padding: 10px; }
+  .btn             { font-size: 7px; padding: 8px 10px; }
+  .players-grid    { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
 }

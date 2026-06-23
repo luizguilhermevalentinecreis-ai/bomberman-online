@@ -270,7 +270,7 @@ class GameRoom {
 
         const nx=p.x+dx*spd, ny=p.y+dy*spd;
         const canMove = (cx,cy) => {
-          const corners=[{x:cx-13,y:cy-13},{x:cx+13,y:cy-13},{x:cx-13,y:cy+13},{x:cx+13,y:cy+13}];
+          const corners=[{x:cx-11,y:cy-11},{x:cx+11,y:cy-11},{x:cx-11,y:cy+11},{x:cx+11,y:cy+11}];
           return corners.every(c=>{
             const tx=Math.floor(c.x/TILE_SIZE), ty=Math.floor(c.y/TILE_SIZE);
             if(tx<0||ty<0||tx>=GRID_W||ty>=GRID_H) return false;
@@ -303,9 +303,10 @@ class GameRoom {
           { p.x=tx2; p.y=ty2; }
       }
 
-      // Clamp nas bordas
-      p.x = Math.max(TILE_SIZE*0.6, Math.min(p.x, (GRID_W-1)*TILE_SIZE-TILE_SIZE*0.1));
-      p.y = Math.max(TILE_SIZE*0.6, Math.min(p.y, (GRID_H-1)*TILE_SIZE-TILE_SIZE*0.1));
+      // Clamp nas bordas — mantém centro do player dentro do tile 1 (fora das paredes da borda)
+      const MARGIN = 14;
+      p.x = Math.max(TILE_SIZE + MARGIN, Math.min(p.x, (GRID_W - 2) * TILE_SIZE + TILE_SIZE - MARGIN));
+      p.y = Math.max(TILE_SIZE + MARGIN, Math.min(p.y, (GRID_H - 2) * TILE_SIZE + TILE_SIZE - MARGIN));
 
       // Coleta power-up
       const tx=Math.floor(p.x/TILE_SIZE), ty=Math.floor(p.y/TILE_SIZE);
@@ -441,14 +442,19 @@ class GameRoom {
   }
 
   checkDeaths() {
-    const cells=new Set(this.state.explosions.map(e=>`${e.tx},${e.ty}`));
-    this.state.players.forEach(p=>{
-      if(!p.alive) return;
-      if(p.ghostTimer>0) return; // fantasma — imune
-      const tx=Math.floor(p.x/TILE_SIZE), ty=Math.floor(p.y/TILE_SIZE);
-      if(cells.has(`${tx},${ty}`)){
-        if(p.shield){p.shield=false;}
-        else{p.alive=false;this.io.to(this.roomId).emit('game:playerDied',{id:p.id,name:p.name,reason:'explosão'});}
+    if (this.state.explosions.length === 0) return;
+    const HIT = TILE_SIZE * 0.42; // raio de hitbox do jogador em pixels
+    this.state.players.forEach(p => {
+      if (!p.alive) return;
+      if (p.ghostTimer > 0) return;
+      const hit = this.state.explosions.some(e => {
+        const ex = e.tx * TILE_SIZE + TILE_SIZE / 2;
+        const ey = e.ty * TILE_SIZE + TILE_SIZE / 2;
+        return Math.abs(p.x - ex) < HIT && Math.abs(p.y - ey) < HIT;
+      });
+      if (hit) {
+        if (p.shield) { p.shield = false; }
+        else { p.alive = false; this.io.to(this.roomId).emit('game:playerDied', { id:p.id, name:p.name, reason:'explosão' }); }
       }
     });
   }
@@ -489,9 +495,12 @@ class GameRoom {
 
   makeWall(x,y){
     this.state.tiles[y][x]=TILE.WALL;
+    const wallCX = x * TILE_SIZE + TILE_SIZE / 2;
+    const wallCY = y * TILE_SIZE + TILE_SIZE / 2;
     this.state.players.forEach(p=>{
       if(!p.alive) return;
-      if(Math.floor(p.x/TILE_SIZE)===x&&Math.floor(p.y/TILE_SIZE)===y){
+      // mata apenas se o centro do jogador está dentro do tile que virou parede
+      if(Math.abs(p.x - wallCX) < TILE_SIZE * 0.5 && Math.abs(p.y - wallCY) < TILE_SIZE * 0.5){
         p.alive=false;
         this.io.to(this.roomId).emit('game:playerDied',{id:p.id,name:p.name,reason:'arena'});
       }
