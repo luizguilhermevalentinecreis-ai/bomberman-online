@@ -25,7 +25,7 @@ const GameScreen = (() => {
         </div>
       </div>
 
-      <canvas id="game-canvas" style="display:block;touch-action:none;"></canvas>
+      <canvas id="game-canvas" style="position:absolute;inset:0;display:block;touch-action:none;width:100%;height:100%;"></canvas>
 
       <!-- Placar lateral -->
       <div id="game-scoreboard" style="
@@ -198,6 +198,10 @@ const GameScreen = (() => {
     roomData.players.forEach(p => { chars[p.id] = p.character || CharRenderer.defaultOpts(); });
 
     const canvas = document.getElementById('game-canvas');
+    // Sincroniza resolução interna com dimensões CSS reais (o canvas agora está visível)
+    canvas.width  = canvas.offsetWidth  || window.innerWidth;
+    canvas.height = canvas.offsetHeight || window.innerHeight;
+
     GameEngine.setCharacters(chars);
     GameEngine.start(canvas, GameSocket.id(), chars);
   }

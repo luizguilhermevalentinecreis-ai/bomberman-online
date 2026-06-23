@@ -25,7 +25,7 @@ const RoomScreen = (() => {
 
       <div class="room-layout">
         <div class="room-players-col">
-          <div class="px-box" style="padding:16px;margin-bottom:16px;">
+          <div class="px-box room-px">
             <div class="section-title">JOGADORES</div>
             <div class="players-grid" id="players-grid"></div>
           </div>
@@ -33,7 +33,7 @@ const RoomScreen = (() => {
 
         <div class="room-right-col">
 
-          <div class="px-box" id="room-settings-box" style="padding:16px;display:none;">
+          <div class="px-box room-px" id="room-settings-box" style="display:none;">
             <div class="section-title">⚙ CONFIGURAÇÕES (HOST)</div>
             <div class="room-settings">
               <div class="settings-row">
@@ -52,7 +52,7 @@ const RoomScreen = (() => {
             </div>
           </div>
 
-          <div class="px-box room-chat" style="padding:16px;">
+          <div class="px-box room-px room-chat">
             <div class="section-title">💬 CHAT</div>
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-row">

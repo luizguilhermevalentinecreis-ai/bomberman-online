@@ -6,8 +6,10 @@ const TICK_MS      = 50;
 const PLAYER_SPEED = 170;
 const BOT_SPEED    = 140;
 const HOT_DURATION = 13000;
-const MATCH_TIME   = 90;
-const COUNTDOWN    = 3;
+const MATCH_TIME    = 90;
+const COUNTDOWN     = 3;
+const STAMINA_MAX   = 100;
+const STAMINA_DRAIN = 2;   // por tick ao fazer sprint
 
 const POWERUP_TYPES = ['extra_bomb','bigger_range','speed','shield','teleport','ghost','mega_range'];
 
@@ -43,6 +45,9 @@ class GameRoom {
       bombs:1, range:2, speed:PLAYER_SPEED,
       alive:true, shield:false, kills:0, powerups:[],
       ghostTimer:0,
+      stamina: STAMINA_MAX,
+      bombUsed: false,
+      _fleeBombTimer: 0, _fleeBombTx: 0, _fleeBombTy: 0,
     }));
     this.state    = null;
     this.interval = null;
@@ -119,6 +124,9 @@ class GameRoom {
       p.shield=false; p.powerups=[]; p.ghostTimer=0;
       p.input={up:false,down:false,left:false,right:false,bomb:false,sprint:false};
       p.bombPressed=false;
+      p.stamina = STAMINA_MAX;          // reseta por mapa
+      p._fleeBombTimer = 0;             // reseta fuga de bomba
+      // p.bombUsed NÃO reseta — persiste por toda a competição
     });
 
     if (this.currentMap.bigBombs) rp.forEach(p => p.range++);
@@ -239,6 +247,9 @@ class GameRoom {
       if (!p.alive) return;
       let inp = { ...p.input };
 
+      // Bloqueia sprint se stamina zerou
+      if (inp.sprint && p.stamina <= 0) inp.sprint = false;
+
       // Controles invertidos ou espelhados
       if (this.state.chaosActive && ev?.id==='controls_invert')
         inp = { up:p.input.down, down:p.input.up, left:p.input.right, right:p.input.left, bomb:p.input.bomb, sprint:p.input.sprint };
@@ -254,6 +265,10 @@ class GameRoom {
 
       let spd = p.speed;
       spd *= inp.sprint ? 1.7 : 1;
+      // Consome stamina ao fazer sprint com movimento
+      if (inp.sprint && (dx!==0||dy!==0)) {
+        p.stamina = Math.max(0, p.stamina - STAMINA_DRAIN);
+      }
       spd *= (this.state.chaosActive && ev?.id==='speed_chaos') ? 2 : 1;
       spd *= isFreeze ? 0.28 : 1;
       spd *= (TICK_MS/1000);
@@ -390,6 +405,7 @@ class GameRoom {
   // ── Bombas estáticas ──────────────────────────────────────────────────────
 
   plantBomb(player) {
+    if (player.bombUsed) return;   // só 1 bomba por competição
     const tx=Math.floor(player.x/TILE_SIZE), ty=Math.floor(player.y/TILE_SIZE);
     if (this.state.bombs.some(b=>b.tx===tx&&b.ty===ty)) return;
     const active=this.state.bombs.filter(b=>b.ownerId===player.id).length;
@@ -404,6 +420,7 @@ class GameRoom {
       tx, ty, x:tx*TILE_SIZE+TILE_SIZE/2, y:ty*TILE_SIZE+TILE_SIZE/2,
       range, timer, maxTimer:timer,
     });
+    player.bombUsed = true;   // marca: usou a bomba dessa competição
   }
 
   updateBombs() {
@@ -545,38 +562,76 @@ class GameRoom {
     this.state.players.filter(p=>p.isBot&&p.alive).forEach(bot=>this.botThink(bot));
   }
 
-  botThink(bot){
-    const tx=Math.floor(bot.x/TILE_SIZE), ty=Math.floor(bot.y/TILE_SIZE);
-    const isCarrier=this.state.hotBomb.carrierId===bot.id;
+  botThink(bot) {
+    const tx = Math.floor(bot.x / TILE_SIZE);
+    const ty = Math.floor(bot.y / TILE_SIZE);
+    const isCarrier = this.state.hotBomb.carrierId === bot.id;
 
-    if(isCarrier){
-      let bestTarget=null,bestDist=999;
-      this.state.players.forEach(p=>{
-        if(p.id===bot.id||!p.alive) return;
-        const d=this.dist(tx,ty,Math.floor(p.x/TILE_SIZE),Math.floor(p.y/TILE_SIZE));
-        if(d<bestDist){bestDist=d;bestTarget=p;}
-      });
-      if(bestTarget){
-        const ptx=Math.floor(bestTarget.x/TILE_SIZE),pty=Math.floor(bestTarget.y/TILE_SIZE);
-        const path=this.bfsTo(tx,ty,ptx,pty);
-        if(path&&path.length>0) this.moveToward(bot,path[0].tx,path[0].ty);
-        else this.randomMove(bot,tx,ty);
-      }
-      bot.input.bomb=false;
+    bot.input.bomb = false;
+    // Sprint aleatório (bots também consomem stamina)
+    bot.input.sprint = bot.stamina > 20 && Math.random() < 0.15;
+
+    // Fuga após plantar bomba
+    if (bot._fleeBombTimer > 0) {
+      bot._fleeBombTimer -= TICK_MS;
+      const safe = this.bfsAwayFrom(tx, ty, bot._fleeBombTx, bot._fleeBombTy);
+      if (safe) this.moveToward(bot, safe.tx, safe.ty);
+      else this.randomMove(bot, tx, ty);
+      bot.input.sprint = bot.stamina > 0; // corre sempre durante fuga
       return;
     }
 
-    const carrier=this.state.players.find(p=>p.id===this.state.hotBomb.carrierId&&p.alive);
-    if(carrier){
-      const ctx2=Math.floor(carrier.x/TILE_SIZE),cty=Math.floor(carrier.y/TILE_SIZE);
-      if(this.dist(tx,ty,ctx2,cty)<5){
-        const safePath=this.bfsAwayFrom(tx,ty,ctx2,cty);
-        if(safePath){this.moveToward(bot,safePath.tx,safePath.ty);bot.input.bomb=false;return;}
+    if (isCarrier) {
+      // Portador da hot bomb: persegue o jogador mais próximo para passar
+      let bestTarget = null, bestDist = 999;
+      this.state.players.forEach(p => {
+        if (p.id === bot.id || !p.alive) return;
+        const d = this.dist(tx, ty, Math.floor(p.x/TILE_SIZE), Math.floor(p.y/TILE_SIZE));
+        if (d < bestDist) { bestDist = d; bestTarget = p; }
+      });
+      if (bestTarget) {
+        const ptx = Math.floor(bestTarget.x/TILE_SIZE), pty = Math.floor(bestTarget.y/TILE_SIZE);
+        const path = this.bfsTo(tx, ty, ptx, pty);
+        if (path && path.length > 0) this.moveToward(bot, path[0].tx, path[0].ty);
+        else this.randomMove(bot, tx, ty);
+      }
+      bot.input.sprint = bot.stamina > 30 && Math.random() < 0.40;
+      return;
+    }
+
+    // Foge do portador se estiver perto
+    const carrier = this.state.players.find(p => p.id === this.state.hotBomb.carrierId && p.alive);
+    if (carrier) {
+      const cx2 = Math.floor(carrier.x/TILE_SIZE), cy2 = Math.floor(carrier.y/TILE_SIZE);
+      if (this.dist(tx, ty, cx2, cy2) < 5) {
+        const safePath = this.bfsAwayFrom(tx, ty, cx2, cy2);
+        if (safePath) { this.moveToward(bot, safePath.tx, safePath.ty); return; }
       }
     }
 
-    bot.input.bomb=false;
-    this.randomMove(bot,tx,ty);
+    // Tenta plantar bomba (1 por competição)
+    if (!bot.bombUsed) {
+      let nearSoft = false, nearEnemy = false;
+      for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+        const nx = tx+dx, ny = ty+dy;
+        if (nx>=0 && ny>=0 && nx<GRID_W && ny<GRID_H && this.state.tiles[ny][nx]===TILE.SOFT) {
+          nearSoft = true; break;
+        }
+      }
+      for (const p of this.state.players) {
+        if (p.id===bot.id || !p.alive) continue;
+        if (Math.hypot(p.x-bot.x, p.y-bot.y) < TILE_SIZE*1.8) { nearEnemy = true; break; }
+      }
+      const chance = nearSoft ? 0.05 : nearEnemy ? 0.07 : 0;
+      if (chance > 0 && Math.random() < chance) {
+        this.plantBomb(bot);
+        bot._fleeBombTimer = 1500;
+        bot._fleeBombTx = tx; bot._fleeBombTy = ty;
+        return;
+      }
+    }
+
+    this.randomMove(bot, tx, ty);
   }
 
   moveToward(bot,tx,ty){
@@ -690,6 +745,7 @@ class GameRoom {
         direction:p.direction,moving:p.moving,frame:p.frame,
         alive:p.alive,shield:p.shield,kills:p.kills,isBot:p.isBot,
         bombs:p.bombs,range:p.range,ghost:p.ghostTimer>0,
+        stamina:Math.floor(p.stamina), bombUsed:p.bombUsed,
       })),
       bombs:       this.state.bombs.map(b=>({id:b.id,tx:b.tx,ty:b.ty,timer:b.timer,maxTimer:b.maxTimer})),
       explosions:  this.state.explosions.map(e=>({tx:e.tx,ty:e.ty})),

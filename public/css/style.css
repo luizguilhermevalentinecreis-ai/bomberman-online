@@ -414,6 +414,7 @@ body {
 .chat-msg.system { color: var(--text-dim); font-style: italic; }
 .chat-input-row  { display: flex; gap: 0.6em; }
 
+.room-px       { padding: 1.6em; }
 .room-settings { display: flex; flex-direction: column; gap: 1.2em; }
 .settings-row  { display: flex; flex-direction: column; gap: 0.6em; }
 

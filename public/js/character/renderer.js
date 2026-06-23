@@ -43,9 +43,9 @@ const CharRenderer = (() => {
     { main:'#2255CC', shadow:'#112288', hi:'#4488EE', name:'Azul'     },
   ];
 
-  const HAT_NAMES       = ['Boné','Mago','Coroa','Afro','Moicano','Cartola','Cowboy','Capacete'];
-  const FACE_NAMES      = ['Normal','Feliz','Bravo','Estiloso','Surpreso','Sonolento'];
-  const ACCESSORY_NAMES = ['Nenhum','Cachecol','Gravata Borboleta','Medalha','Capa','Óculos'];
+  const HAT_NAMES       = ['Boné','Mago','Coroa','Afro','Moicano','Cartola','Cowboy','Capacete','Bandana','Pirata','Headphone','Tiara'];
+  const FACE_NAMES      = ['Normal','Feliz','Bravo','Estiloso','Surpreso','Sonolento','Malicioso','Feroz'];
+  const ACCESSORY_NAMES = ['Nenhum','Cachecol','Gravata Borboleta','Medalha','Capa','Óculos','Máscara','Ombreiras','Colar','Asas','Bracelete','Pin Estrela'];
   const SKIN_NAMES      = SKIN_COLORS.map(c=>c.name);
   const BODY_NAMES      = BODY_COLORS.map(c=>c.name);
   const PANTS_NAMES     = PANTS_COLORS.map(c=>c.name);
@@ -188,10 +188,34 @@ const CharRenderer = (() => {
         px(ctx,6,5+oy,K,2,1,s); px(ctx,12,5+oy,K,2,1,s);
       },
       ()=>{ // 5 Sonolento
-        px(ctx,6,8+oy,K,3,1,s); px(ctx,11,8+oy,K,3,1,s); // olhos meio fechados
+        px(ctx,6,8+oy,K,3,1,s); px(ctx,11,8+oy,K,3,1,s);
         px(ctx,6,7+oy,'#fff',3,1,s); px(ctx,11,7+oy,'#fff',3,1,s);
         px(ctx,8,11+oy,K,4,1,s);
         px(ctx,14,5+oy,'#6666ff',2,1,s); px(ctx,15,4+oy,'#6666ff',2,1,s);
+      },
+      ()=>{ // 6 Malicioso
+        if(blink){ px(ctx,6,8+oy,K,3,1,s); px(ctx,11,8+oy,K,3,1,s); return; }
+        // Sobrancelhas levantadas no interno
+        px(ctx,8,5+oy,K,2,1,s); px(ctx,12,5+oy,K,2,1,s);
+        px(ctx,6,6+oy,K,1,1,s); px(ctx,13,6+oy,K,1,1,s);
+        // Olhos semicerrados com brilho
+        px(ctx,6,8+oy,K,3,1,s); px(ctx,11,8+oy,K,3,1,s);
+        px(ctx,6,7+oy,'#fff',2,1,s); px(ctx,7,8+oy,'#880000',1,1,s);
+        px(ctx,11,7+oy,'#fff',2,1,s); px(ctx,12,8+oy,'#880000',1,1,s);
+        // Sorriso assimétrico
+        px(ctx,10,11+oy,K,4,1,s); px(ctx,9,10+oy,K,1,1,s);
+      },
+      ()=>{ // 7 Feroz
+        if(blink){ px(ctx,6,8+oy,K,3,1,s); px(ctx,11,8+oy,K,3,1,s); return; }
+        // Sobrancelhas grossas inclinadas
+        px(ctx,5,6+oy,K,4,1,s); px(ctx,6,5+oy,K,2,1,s);
+        px(ctx,11,6+oy,K,4,1,s); px(ctx,12,5+oy,K,2,1,s);
+        // Olhos vermelhos
+        px(ctx,6,7+oy,K,4,3,s); px(ctx,6,7+oy,'#CC0000',3,2,s); px(ctx,9,8+oy,K,1,1,s);
+        px(ctx,11,7+oy,K,4,3,s); px(ctx,11,7+oy,'#CC0000',3,2,s); px(ctx,14,8+oy,K,1,1,s);
+        // Boca aberta com dentes
+        px(ctx,7,10+oy,K,6,2,s); px(ctx,8,11+oy,'#880000',4,1,s);
+        px(ctx,8,10+oy,'#fff',1,1,s); px(ctx,10,10+oy,'#fff',2,1,s);
       },
     ];
     (faces[style % faces.length] || faces[0])();
@@ -406,10 +430,56 @@ const CharRenderer = (() => {
         }
         px(ctx,4,-4+oy,K,1,8,s); px(ctx,15,-4+oy,K,1,8,s);
         px(ctx,5,-3+oy,H.hi,3,1,s);
-        // Viseira
         px(ctx,6,3+oy,'#44AACC',8,2,s);
         px(ctx,6,3+oy,'#88DDFF',4,1,s);
         px(ctx,5,3+oy,K,1,2,s); px(ctx,14,3+oy,K,1,2,s);
+      },
+      ()=>{ // Bandana
+        px(ctx,4,3+oy,H.main,12,3,s);
+        px(ctx,4,3+oy,K,12,1,s); px(ctx,4,6+oy,K,12,1,s);
+        px(ctx,4,3+oy,K,1,3,s); px(ctx,15,3+oy,K,1,3,s);
+        px(ctx,5,4+oy,H.hi,4,1,s);
+        // Laço do lado direito
+        px(ctx,15,2+oy,H.shadow,3,2,s); px(ctx,15,2+oy,K,1,2,s); px(ctx,17,2+oy,K,1,2,s);
+        px(ctx,16,2+oy,H.main,1,1,s); px(ctx,16,3+oy,H.shadow,1,1,s);
+      },
+      ()=>{ // Pirata
+        px(ctx,4,1+oy,K,12,1,s); px(ctx,4,5+oy,K,12,1,s);
+        px(ctx,4,1+oy,K,1,4,s); px(ctx,15,1+oy,K,1,4,s);
+        px(ctx,5,2+oy,'#111',10,3,s);
+        px(ctx,5,2+oy,'#222',10,1,s);
+        // Aba larga
+        px(ctx,2,4+oy,K,16,1,s); px(ctx,2,6+oy,K,16,1,s);
+        px(ctx,3,5+oy,'#111',14,1,s); px(ctx,3,5+oy,'#222',12,1,s);
+        // Caveira
+        px(ctx,8,2+oy,'#DDD',4,2,s);
+        px(ctx,7,3+oy,'#DDD',1,1,s); px(ctx,12,3+oy,'#DDD',1,1,s);
+        px(ctx,9,3+oy,'#111',1,1,s); px(ctx,11,3+oy,'#111',1,1,s);
+        px(ctx,8,4+oy,'#DDD',1,1,s); px(ctx,9,4+oy,'#DDD',1,1,s); px(ctx,11,4+oy,'#DDD',1,1,s); px(ctx,12,4+oy,'#DDD',1,1,s);
+      },
+      ()=>{ // Headphone
+        // Aro sobre a cabeça
+        px(ctx,6,-2+oy,H.shadow,8,2,s);
+        px(ctx,6,-2+oy,K,8,1,s); px(ctx,6,-1+oy,K,1,2,s); px(ctx,13,-1+oy,K,1,2,s);
+        px(ctx,7,-1+oy,H.main,6,1,s);
+        // Hastes
+        px(ctx,4,-1+oy,H.shadow,3,5,s); px(ctx,13,-1+oy,H.shadow,3,5,s);
+        // Conchas
+        px(ctx,2,3+oy,K,5,5,s); px(ctx,3,4+oy,H.main,3,3,s); px(ctx,3,4+oy,H.hi,2,1,s);
+        px(ctx,13,3+oy,K,5,5,s); px(ctx,14,4+oy,H.main,3,3,s); px(ctx,14,4+oy,H.hi,2,1,s);
+        // Detalhe sonoro
+        px(ctx,4,5+oy,'#000',1,1,s); px(ctx,15,5+oy,'#000',1,1,s);
+      },
+      ()=>{ // Tiara
+        px(ctx,5,3+oy,H.main,10,2,s);
+        px(ctx,5,3+oy,K,10,1,s); px(ctx,5,5+oy,K,10,1,s);
+        px(ctx,5,3+oy,K,1,2,s); px(ctx,14,3+oy,K,1,2,s);
+        px(ctx,6,4+oy,H.hi,3,1,s);
+        // Joinha central — flor/gema
+        px(ctx,9,0+oy,'#FF99CC',1,1,s); px(ctx,8,1+oy,'#FF99CC',1,1,s); px(ctx,10,1+oy,'#FF99CC',1,1,s);
+        px(ctx,9,1+oy,H.hi,1,2,s);
+        px(ctx,8,2+oy,'#FF99CC',1,1,s); px(ctx,10,2+oy,'#FF99CC',1,1,s);
+        px(ctx,9,3+oy,'#FF99CC',1,1,s);
       },
     ];
     (fns[opts.hat % fns.length] || fns[0])();
@@ -426,6 +496,26 @@ const CharRenderer = (() => {
       ()=>{ px(ctx,5,-4+oy,K,10,1,s); px(ctx,5,3+oy,K,10,1,s); px(ctx,5,-3+oy,K,1,7,s); px(ctx,14,-3+oy,K,1,7,s); px(ctx,6,-3+oy,H.shadow,8,6,s); px(ctx,6,2+oy,'#997700',8,1,s); px(ctx,3,3+oy,K,14,2,s); px(ctx,4,4+oy,H.shadow,12,1,s); },
       ()=>{ px(ctx,5,-1+oy,K,10,5,s); px(ctx,6,0+oy,H.shadow,8,4,s); px(ctx,1,4+oy,K,18,2,s); px(ctx,2,5+oy,H.shadow,16,1,s); },
       ()=>{ for(let dy=0;dy<7;dy++){const t=Math.abs(dy-3)*1.1;const x0=Math.max(4,(4+t*0.5)|0),x1=Math.min(16,(16-t*0.5)|0);if(x1>x0)px(ctx,x0,dy-3+oy,dy===0?K:H.shadow,x1-x0,1,s);} px(ctx,4,-4+oy,K,1,8,s); px(ctx,15,-4+oy,K,1,8,s); px(ctx,4,3+oy,K,12,2,s); px(ctx,5,4+oy,H.shadow,10,1,s); },
+      ()=>{ // Bandana costas
+        px(ctx,4,3+oy,H.shadow,12,3,s);
+        px(ctx,4,3+oy,K,12,1,s); px(ctx,4,6+oy,K,12,1,s);
+        px(ctx,4,3+oy,K,1,3,s); px(ctx,15,3+oy,K,1,3,s);
+        px(ctx,15,2+oy,H.shadow,3,3,s); px(ctx,15,2+oy,K,1,3,s);
+      },
+      ()=>{ // Pirata costas
+        px(ctx,4,1+oy,K,12,4,s); px(ctx,5,2+oy,'#111',10,3,s);
+        px(ctx,2,4+oy,K,16,2,s); px(ctx,3,5+oy,'#111',14,1,s);
+      },
+      ()=>{ // Headphone costas
+        px(ctx,6,-2+oy,H.shadow,8,2,s); px(ctx,6,-2+oy,K,8,1,s);
+        px(ctx,4,-1+oy,H.shadow,3,5,s); px(ctx,13,-1+oy,H.shadow,3,5,s);
+        px(ctx,2,3+oy,K,5,5,s); px(ctx,3,4+oy,H.shadow,3,3,s);
+        px(ctx,13,3+oy,K,5,5,s); px(ctx,14,4+oy,H.shadow,3,3,s);
+      },
+      ()=>{ // Tiara costas
+        px(ctx,5,3+oy,H.shadow,10,2,s);
+        px(ctx,5,3+oy,K,10,1,s); px(ctx,5,5+oy,K,10,1,s);
+      },
     ];
     (fns[opts.hat % fns.length] || fns[0])();
   }
@@ -441,6 +531,31 @@ const CharRenderer = (() => {
       ()=>{ px(ctx,5,-4+oy,K,9,7,s); px(ctx,6,-3+oy,H.main,7,6,s); px(ctx,6,-3+oy,H.hi,7,1,s); px(ctx,6,2+oy,'#DDAA00',7,1,s); px(ctx,3,3+oy,K,12,2,s); px(ctx,4,4+oy,H.shadow,10,1,s); },
       ()=>{ px(ctx,5,-1+oy,K,9,5,s); px(ctx,6,0+oy,H.main,7,4,s); px(ctx,6,0+oy,H.hi,7,1,s); px(ctx,1,4+oy,K,14,2,s); px(ctx,2,5+oy,H.shadow,12,1,s); },
       ()=>{ for(let dy=0;dy<7;dy++){const t=Math.abs(dy-3)*1.1;const x0=Math.max(4,(4+t*0.5)|0),x1=Math.min(14,(14-t*0.5)|0);if(x1>x0)px(ctx,x0,dy-3+oy,dy===0?K:H.main,x1-x0,1,s);} px(ctx,4,-4+oy,K,1,8,s); px(ctx,13,-4+oy,K,1,8,s); px(ctx,4,3+oy,K,10,1,s); px(ctx,5,3+oy,'#44AACC',8,2,s); px(ctx,5,3+oy,'#88DDFF',4,1,s); },
+      ()=>{ // Bandana lado
+        px(ctx,5,3+oy,H.main,9,3,s);
+        px(ctx,5,3+oy,K,9,1,s); px(ctx,5,6+oy,K,9,1,s);
+        px(ctx,5,3+oy,K,1,3,s); px(ctx,13,3+oy,K,1,3,s);
+        px(ctx,6,4+oy,H.hi,3,1,s);
+      },
+      ()=>{ // Pirata lado
+        px(ctx,5,1+oy,K,9,4,s); px(ctx,6,2+oy,'#111',7,3,s);
+        px(ctx,2,4+oy,K,14,2,s); px(ctx,3,5+oy,'#111',12,1,s);
+        px(ctx,7,2+oy,'#DDD',3,2,s); px(ctx,9,3+oy,'#111',1,1,s);
+      },
+      ()=>{ // Headphone lado
+        px(ctx,6,-2+oy,H.shadow,6,2,s); px(ctx,6,-2+oy,K,6,1,s);
+        px(ctx,4,-1+oy,H.shadow,3,5,s); px(ctx,11,-1+oy,H.shadow,3,5,s);
+        px(ctx,2,3+oy,K,5,5,s); px(ctx,3,4+oy,H.main,3,3,s);
+        px(ctx,12,3+oy,K,4,5,s); px(ctx,13,4+oy,H.main,2,3,s);
+      },
+      ()=>{ // Tiara lado
+        px(ctx,5,3+oy,H.main,9,2,s);
+        px(ctx,5,3+oy,K,9,1,s); px(ctx,5,5+oy,K,9,1,s);
+        px(ctx,5,3+oy,K,1,2,s); px(ctx,13,3+oy,K,1,2,s);
+        // Flor lateral
+        px(ctx,9,0+oy,'#FF99CC',3,1,s); px(ctx,10,1+oy,'#FF99CC',1,1,s);
+        px(ctx,10,1+oy,H.hi,1,1,s);
+      },
     ];
     (fns[opts.hat % fns.length] || fns[0])();
   }
@@ -474,6 +589,53 @@ const CharRenderer = (() => {
         px(ctx,9,8+oy,'#333',2,1,s);
         px(ctx,5,6+oy,'#333',9,1,s);
       },
+      ()=>{ // Máscara ninja (cobre metade inferior da face)
+        px(ctx,5,9+oy,'#223388',10,5,s);
+        px(ctx,4,10+oy,K,1,3,s); px(ctx,15,10+oy,K,1,3,s);
+        px(ctx,5,9+oy,K,10,1,s); px(ctx,5,13+oy,K,10,1,s);
+        px(ctx,6,10+oy,'#3344AA',8,1,s);
+        px(ctx,9,11+oy,'#5566CC',2,1,s);
+      },
+      ()=>{ // Ombreiras
+        // Esquerda
+        px(ctx,1,14+oy,'#888',4,3,s); px(ctx,1,14+oy,K,4,1,s); px(ctx,1,14+oy,K,1,3,s); px(ctx,4,14+oy,K,1,3,s);
+        px(ctx,1,16+oy,K,4,1,s); px(ctx,2,15+oy,'#AAA',2,1,s);
+        // Direita
+        px(ctx,15,14+oy,'#888',4,3,s); px(ctx,15,14+oy,K,4,1,s); px(ctx,15,14+oy,K,1,3,s); px(ctx,18,14+oy,K,1,3,s);
+        px(ctx,15,16+oy,K,4,1,s); px(ctx,16,15+oy,'#AAA',2,1,s);
+      },
+      ()=>{ // Colar de Ouro
+        px(ctx,6,13+oy,'#DDAA00',8,1,s);
+        px(ctx,5,14+oy,'#DDAA00',1,1,s); px(ctx,14,14+oy,'#DDAA00',1,1,s);
+        px(ctx,9,15+oy,K,2,1,s); px(ctx,9,14+oy,'#CC8800',2,1,s);
+        px(ctx,9,15+oy,'#FF3366',2,1,s);
+        px(ctx,5,13+oy,'#FFDD00',1,1,s); px(ctx,14,13+oy,'#FFDD00',1,1,s);
+      },
+      ()=>{ // Asas
+        // Asa esquerda
+        px(ctx,1,14+oy,'#DDDDDD',3,8,s); px(ctx,2,15+oy,'#FFFFFF',1,6,s);
+        px(ctx,1,14+oy,K,3,1,s); px(ctx,1,21+oy,K,3,1,s); px(ctx,1,14+oy,K,1,7,s);
+        // Asa direita
+        px(ctx,16,14+oy,'#DDDDDD',3,8,s); px(ctx,17,15+oy,'#FFFFFF',1,6,s);
+        px(ctx,16,14+oy,K,3,1,s); px(ctx,16,21+oy,K,3,1,s); px(ctx,18,14+oy,K,1,7,s);
+      },
+      ()=>{ // Bracelete dourado
+        // Pulso esquerdo
+        px(ctx,2,20+oy,'#DDAA00',2,2,s); px(ctx,2,20+oy,K,2,1,s); px(ctx,2,21+oy,K,2,1,s);
+        px(ctx,2,20+oy,K,1,2,s); px(ctx,3,20+oy,'#FFDD00',1,1,s);
+        // Pulso direito
+        px(ctx,16,20+oy,'#DDAA00',2,2,s); px(ctx,16,20+oy,K,2,1,s); px(ctx,16,21+oy,K,2,1,s);
+        px(ctx,17,20+oy,K,1,2,s); px(ctx,16,20+oy,'#FFDD00',1,1,s);
+      },
+      ()=>{ // Pin Estrela (no peito)
+        // Estrela de 5 pontas simplificada
+        px(ctx,9,15+oy,'#FFDD00',2,3,s);
+        px(ctx,8,16+oy,'#FFDD00',4,1,s);
+        px(ctx,8,15+oy,K,1,1,s); px(ctx,11,15+oy,K,1,1,s);
+        px(ctx,8,17+oy,K,1,1,s); px(ctx,11,17+oy,K,1,1,s);
+        px(ctx,9,17+oy,'#CC8800',2,1,s);
+        px(ctx,9,16+oy,'#FFF8AA',1,1,s);
+      },
     ];
     (fns[opts.accessory % fns.length] || fns[0])();
   }
@@ -491,6 +653,21 @@ const CharRenderer = (() => {
         px(ctx,3,15+oy,K,14,1,s);
       },
       ()=>{},
+      ()=>{ // Máscara costas
+        px(ctx,5,9+oy,'#223388',10,4,s);
+        px(ctx,4,10+oy,K,1,2,s); px(ctx,15,10+oy,K,1,2,s);
+        px(ctx,5,9+oy,K,10,1,s); px(ctx,5,13+oy,K,10,1,s);
+      },
+      ()=>{}, // Ombreiras (visíveis na frente)
+      ()=>{}, // Colar (não visível atrás)
+      ()=>{ // Asas costas — maiores e mais detalhadas
+        px(ctx,1,12+oy,'#CCCCCC',3,10,s); px(ctx,2,13+oy,'#EEEEEE',1,8,s);
+        px(ctx,1,12+oy,K,3,1,s); px(ctx,1,21+oy,K,3,1,s); px(ctx,1,12+oy,K,1,9,s);
+        px(ctx,16,12+oy,'#CCCCCC',3,10,s); px(ctx,17,13+oy,'#EEEEEE',1,8,s);
+        px(ctx,16,12+oy,K,3,1,s); px(ctx,16,21+oy,K,3,1,s); px(ctx,18,12+oy,K,1,9,s);
+      },
+      ()=>{}, // Bracelete (frontal)
+      ()=>{}, // Pin (frontal)
     ];
     (fns[opts.accessory % fns.length] || fns[0])();
   }
