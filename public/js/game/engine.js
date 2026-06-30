@@ -489,6 +489,36 @@ const GameEngine = (() => {
     ctx.restore();
   }
 
+  // ── Gamepad ───────────────────────────────────────────────────────────────
+  // Suporta PS4 (DualShock 4), Xbox e gamepads genéricos via Web Gamepad API
+  // PS4: Cross=0, Circle=1, Square=2, Triangle=3, L1=4, R1=5, L2=6, R2=7
+  //      Share=8, Options=9, L3=10, R3=11, Up=12, Down=13, Left=14, Right=15
+  // Xbox: A=0, B=1, X=2, Y=3, LB=4, RB=5, LT=6, RT=7, Back=8, Start=9
+  //       LS=10, RS=11, Up=12, Down=13, Left=14, Right=15
+  function pollGamepad() {
+    const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+    if (!gamepads) return {};
+    // Usa o primeiro gamepad conectado
+    const gp = Array.from(gamepads).find(g => g && g.connected);
+    if (!gp) return {};
+
+    const DEAD = 0.28; // dead zone dos analógicos
+    const btn  = i => !!(gp.buttons[i]?.pressed || gp.buttons[i]?.value > 0.5);
+
+    // Movimento: D-pad OU analógico esquerdo
+    const axX = gp.axes[0] || 0;
+    const axY = gp.axes[1] || 0;
+
+    return {
+      up:     btn(12) || axY < -DEAD,
+      down:   btn(13) || axY >  DEAD,
+      left:   btn(14) || axX < -DEAD,
+      right:  btn(15) || axX >  DEAD,
+      bomb:   btn(0),                      // Cross / A
+      sprint: btn(7) || btn(5) || btn(6),  // R2 / R1 / L2 (PS4) ou RT/RB/LT (Xbox)
+    };
+  }
+
   // ── Teclado ───────────────────────────────────────────────────────────────
   function setupKeyboard() {
     document.addEventListener('keydown', onKeyDown);
@@ -574,14 +604,15 @@ const GameEngine = (() => {
     const jDown = joy.active && joy.dy >  DEAD;
     const jLeft = joy.active && joy.dx < -DEAD;
     const jRight= joy.active && joy.dx >  DEAD;
+    const gp    = pollGamepad();
 
     const inp = {
-      up:     !!(keys['ArrowUp']    || keys['KeyW'] || jUp),
-      down:   !!(keys['ArrowDown']  || keys['KeyS'] || jDown),
-      left:   !!(keys['ArrowLeft']  || keys['KeyA'] || jLeft),
-      right:  !!(keys['ArrowRight'] || keys['KeyD'] || jRight),
-      bomb:   !!(keys['Space'] || keys['KeyZ'] || keys['Enter'] || bombTouch),
-      sprint: !!(keys['ShiftLeft']  || keys['ShiftRight'] || joy.sprint),
+      up:     !!(keys['ArrowUp']    || keys['KeyW'] || jUp    || gp.up),
+      down:   !!(keys['ArrowDown']  || keys['KeyS'] || jDown  || gp.down),
+      left:   !!(keys['ArrowLeft']  || keys['KeyA'] || jLeft  || gp.left),
+      right:  !!(keys['ArrowRight'] || keys['KeyD'] || jRight || gp.right),
+      bomb:   !!(keys['Space'] || keys['KeyZ'] || keys['Enter'] || bombTouch || gp.bomb),
+      sprint: !!(keys['ShiftLeft']  || keys['ShiftRight'] || joy.sprint || gp.sprint),
     };
 
     const s = JSON.stringify(inp);

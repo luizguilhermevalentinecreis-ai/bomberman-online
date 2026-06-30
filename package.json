@@ -1,14 +1,41 @@
 {
   "name": "bomberman-online",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "electron/main.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "npx nodemon server.js"
+    "dev": "npx nodemon server.js",
+    "electron": "electron .",
+    "build:win": "electron-builder --win --x64"
   },
   "dependencies": {
     "express": "^4.18.2",
     "socket.io": "^4.7.2",
     "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "electron": "^29.4.6",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.bomberman.lan",
+    "productName": "Bomberman LAN",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        { "target": "portable", "arch": ["x64"] }
+      ]
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!.git/**",
+      "!*.md",
+      "!.gitignore",
+      "!.env"
+    ],
+    "asar": false
   }
 }

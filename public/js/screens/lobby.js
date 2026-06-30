@@ -13,6 +13,7 @@ const LobbyScreen = (() => {
           <div style="font-size:7px;color:var(--text-dim);margin-top:4px;">
             Jogando como <span id="lobby-playername" style="color:var(--accent2);"></span>
           </div>
+          <div id="lan-ip-banner" style="display:none;font-size:6px;color:var(--accent3);margin-top:6px;line-height:1.8;"></div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn btn-secondary btn-sm" id="lobby-char">👤 PERSONAGEM</button>
@@ -129,6 +130,33 @@ const LobbyScreen = (() => {
     // Auto-refresh every 5s
     refreshTimer = setInterval(() => GameSocket.emit('room:list'), 5000);
     GameSocket.emit('room:list');
+
+    // Mostra IP local (útil no modo LAN/hotspot)
+    fetchLanIP();
+  }
+
+  function fetchLanIP() {
+    // window.__LOCAL_IPS__ é injetado pelo Electron; fallback: busca via API
+    const banner = document.getElementById('lan-ip-banner');
+    if (!banner) return;
+
+    const showBanner = (ips, port) => {
+      if (!ips || ips.length === 0) return;
+      banner.innerHTML =
+        `📡 <b>Rede local:</b> ` +
+        ips.map(ip => `<span style="color:#ffcc00;">http://${ip}:${port}</span>`).join('  ·  ') +
+        `<br><span style="color:var(--text-dim);">Outros jogadores entrem neste endereço no navegador</span>`;
+      banner.style.display = 'block';
+    };
+
+    if (window.__LOCAL_IPS__ && window.__LOCAL_IPS__.length > 0) {
+      showBanner(window.__LOCAL_IPS__, window.__PORT__ || 3000);
+    } else {
+      fetch('/api/localip')
+        .then(r => r.json())
+        .then(({ ips, port }) => showBanner(ips, port))
+        .catch(() => {});
+    }
   }
 
   function onRoomList(rooms) {

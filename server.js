@@ -3,13 +3,30 @@ const http     = require('http');
 const { Server } = require('socket.io');
 const { v4: uuidv4 } = require('uuid');
 const path     = require('path');
+const os       = require('os');
 const { GameRoom } = require('./server/game/gameRoom');
+
+function getLocalIPs() {
+  const result = [];
+  const ifaces = os.networkInterfaces();
+  for (const name of Object.keys(ifaces)) {
+    for (const iface of ifaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) result.push(iface.address);
+    }
+  }
+  return result;
+}
 
 const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, { cors: { origin: '*' } });
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+// IPs locais (usado pelo app LAN para mostrar endereço de conexão)
+app.get('/api/localip', (_req, res) => {
+  res.json({ ips: getLocalIPs(), port: PORT });
+});
 
 // ─── Armazenamento ────────────────────────────────────────────────────────────
 const rooms      = new Map(); // roomId → room
@@ -271,4 +288,15 @@ io.on('connection', socket => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🎮 Bomberman Online → http://localhost:${PORT}`));
+
+// serverReady: resolve com a porta quando o servidor estiver pronto
+// Usado pelo Electron para saber quando pode abrir a janela
+const serverReady = new Promise(resolve => {
+  server.listen(PORT, () => {
+    console.log(`🎮 Bomberman Online → http://localhost:${PORT}`);
+    console.log(`📡 LAN: ${getLocalIPs().map(ip => `http://${ip}:${PORT}`).join(', ') || '(sem rede local)'}`);
+    resolve(PORT);
+  });
+});
+
+module.exports = { serverReady };
