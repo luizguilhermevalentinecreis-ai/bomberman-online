@@ -44,10 +44,10 @@ function createBot(index) {
     id: `bot_${uuidv4()}`,
     name: NAMES[index % NAMES.length],
     character: {
-      skin: Math.floor(Math.random()*6), hat: Math.floor(Math.random()*7),
-      hatColor: Math.floor(Math.random()*7), body: Math.floor(Math.random()*6),
-      pants: Math.floor(Math.random()*4), eyeStyle: Math.floor(Math.random()*5),
-      accessory: Math.floor(Math.random()*5),
+      skin: Math.floor(Math.random()*6), hat: Math.floor(Math.random()*12),
+      hatColor: Math.floor(Math.random()*8), body: Math.floor(Math.random()*9),
+      pants: Math.floor(Math.random()*6), eyeStyle: Math.floor(Math.random()*8),
+      accessory: Math.floor(Math.random()*12),
     },
     ready: true, isBot: true,
   };

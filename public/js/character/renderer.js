@@ -3,16 +3,18 @@
 
 const CharRenderer = (() => {
 
+  // SKIN_COLORS repurposed as screen/display colors (helmet "tela")
   const SKIN_COLORS = [
-    { main:'#FFCBA4', shadow:'#D4956A', hi:'#FFE4CC', ear:'#F0A878', name:'Claro'     },
-    { main:'#D4956A', shadow:'#A0643A', hi:'#E8B08A', ear:'#C07848', name:'Médio'     },
-    { main:'#C68642', shadow:'#8A5A1E', hi:'#DDA060', ear:'#A86C28', name:'Bronzeado' },
-    { main:'#8D5524', shadow:'#5C3010', hi:'#AA7040', ear:'#764418', name:'Moreno'    },
-    { main:'#4A2912', shadow:'#280F00', hi:'#6A3D20', ear:'#341808', name:'Escuro'    },
-    { main:'#B09070', shadow:'#806040', hi:'#C8AA90', ear:'#906850', name:'Oliva'     },
+    { main:'#00FF88', shadow:'#00AA55', hi:'#88FFCC', ear:'#00CC66', name:'Verde'    },
+    { main:'#00CCFF', shadow:'#0088BB', hi:'#88EEFF', ear:'#0099DD', name:'Ciano'    },
+    { main:'#FF44AA', shadow:'#BB1166', hi:'#FF88CC', ear:'#CC2277', name:'Rosa'     },
+    { main:'#FFCC00', shadow:'#BB8800', hi:'#FFEE88', ear:'#DDAA00', name:'Âmbar'   },
+    { main:'#FF3300', shadow:'#AA1100', hi:'#FF7744', ear:'#CC2200', name:'Vermelho' },
+    { main:'#DDDDFF', shadow:'#9999CC', hi:'#FFFFFF', ear:'#BBBBEE', name:'Branco'   },
   ];
 
   const BODY_COLORS = [
+    { main:'#3a2d6e', shadow:'#1e1640', hi:'#5a4a9e', name:'Traje'   },
     { main:'#3355FF', shadow:'#1133CC', hi:'#6688FF', name:'Azul'    },
     { main:'#FF3333', shadow:'#CC1111', hi:'#FF6655', name:'Vermelho' },
     { main:'#33AA44', shadow:'#117722', hi:'#55CC66', name:'Verde'    },
@@ -62,7 +64,7 @@ const CharRenderer = (() => {
   // ── FRENTE ────────────────────────────────────────────────────────────────
 
   function drawFront(ctx, opts, frame, s, carryBomb) {
-    const SK = SKIN_COLORS[opts.skin] || SKIN_COLORS[0];
+    const SC = SKIN_COLORS[opts.skin] || SKIN_COLORS[0]; // screen/display color
     const B  = BODY_COLORS[opts.body] || BODY_COLORS[0];
     const P  = PANTS_COLORS[opts.pants] || PANTS_COLORS[0];
 
@@ -72,77 +74,59 @@ const CharRenderer = (() => {
     const armL = legR;
     const armR = legL;
 
-    // Sombra chão
-    px(ctx,5,34,K,10,1,s);
+    // Ground shadow
     ctx.fillStyle='rgba(0,0,0,0.18)'; ctx.fillRect(5*s,34*s,10*s,1*s);
 
-    // Sapatos
-    px(ctx,4,30+legL+bob,K,6,3,s);
-    px(ctx,5,30+legL+bob,'#1a1a1a',4,2,s);
-    px(ctx,5,30+legL+bob,'#333',2,1,s);
-    px(ctx,11,30+legR+bob,K,6,3,s);
-    px(ctx,12,30+legR+bob,'#1a1a1a',4,2,s);
-    px(ctx,12,30+legR+bob,'#333',2,1,s);
+    // === BOOTS ===
+    px(ctx,4,30+legL+bob,K,6,3,s); px(ctx,5,30+legL+bob,'#1a1a2e',4,2,s); px(ctx,5,30+legL+bob,'#2a2a3e',2,1,s);
+    px(ctx,10,30+legR+bob,K,6,3,s); px(ctx,11,30+legR+bob,'#1a1a2e',4,2,s); px(ctx,11,30+legR+bob,'#2a2a3e',2,1,s);
 
-    // Pernas
-    px(ctx,5,23+bob,K,1,8,s); px(ctx,8,23+bob,K,1,8,s);
-    px(ctx,6,23+legL+bob,P.main,2,7,s);
-    px(ctx,7,25+legL+bob,P.shadow,1,4,s);
-    px(ctx,12,23+bob,K,1,8,s); px(ctx,15,23+bob,K,1,8,s);
-    px(ctx,13,23+legR+bob,P.main,2,7,s);
-    px(ctx,14,25+legR+bob,P.shadow,1,4,s);
+    // === LEGS (pants) ===
+    px(ctx,4,23+bob,K,1,8,s); px(ctx,9,23+bob,K,2,8,s); px(ctx,14,23+bob,K,1,8,s);
+    px(ctx,5,23+legL+bob,P.main,4,7,s); px(ctx,7,25+legL+bob,P.shadow,2,4,s);
+    px(ctx,10,23+legR+bob,P.main,4,7,s); px(ctx,11,25+legR+bob,P.shadow,2,4,s);
 
-    // Cinto
-    px(ctx,5,22+bob,'#CCAA00',10,1,s);
-    px(ctx,9,22+bob,'#FF8800',2,1,s);
-
-    // Corpo — outline
-    px(ctx,4,14+bob,K,12,1,s);
+    // === BELT ===
     px(ctx,4,22+bob,K,12,1,s);
-    px(ctx,4,15+bob,K,1,7,s);
-    px(ctx,15,15+bob,K,1,7,s);
-    // Corpo — fill
+    px(ctx,5,22+bob,'#CCAA00',8,1,s); px(ctx,9,22+bob,'#FF8800',2,1,s);
+
+    // === TORSO ===
+    px(ctx,4,14+bob,K,12,1,s); px(ctx,4,22+bob,K,12,1,s);
+    px(ctx,4,15+bob,K,1,7,s); px(ctx,15,15+bob,K,1,7,s);
     px(ctx,5,15+bob,B.main,10,6,s);
     px(ctx,5,15+bob,B.hi,10,1,s);
+    px(ctx,5,17+bob,B.shadow,10,1,s); // armor seam
     px(ctx,5,20+bob,B.shadow,10,1,s);
-    // Gola
-    px(ctx,8,14+bob,SK.main,4,1,s);
+    // Chest panel
+    px(ctx,8,16+bob,B.shadow,4,3,s); px(ctx,9,17+bob,B.main,2,1,s);
+    // Collar (suit neck)
+    px(ctx,8,14+bob,B.shadow,4,1,s);
 
-    // Braço esquerdo
+    // === ARMS ===
     px(ctx,2,15+bob,K,3,8,s);
-    px(ctx,3,15+armL+bob,B.main,1,7,s);
-    px(ctx,2,15+armL+bob,B.shadow,1,7,s);
-    px(ctx,2,22+armL+bob,SK.main,2,2,s);
-    // Braço direito
+    px(ctx,3,15+armL+bob,B.main,1,7,s); px(ctx,2,15+armL+bob,B.shadow,1,7,s);
+    px(ctx,2,22+armL+bob,B.shadow,2,2,s);
     px(ctx,15,15+bob,K,3,8,s);
-    px(ctx,16,15+armR+bob,B.main,1,7,s);
-    px(ctx,17,15+armR+bob,B.shadow,1,7,s);
-    px(ctx,16,22+armR+bob,SK.main,2,2,s);
+    px(ctx,16,15+armR+bob,B.main,1,7,s); px(ctx,17,15+armR+bob,B.shadow,1,7,s);
+    px(ctx,16,22+armR+bob,B.shadow,2,2,s);
 
-    // Cabeça — outline (cantos cortados = pixel art rounded)
-    px(ctx,5,4+bob,K,10,1,s);  // topo
-    px(ctx,5,13+bob,K,10,1,s); // base
-    px(ctx,4,5+bob,K,1,8,s);   // esq
-    px(ctx,15,5+bob,K,1,8,s);  // dir
-    // Cabeça — fill skin
-    px(ctx,5,5+bob,SK.main,10,8,s);
-    // Sombra lateral direita
-    px(ctx,14,5+bob,SK.shadow,1,8,s);
-    // Sombra base
-    px(ctx,5,12+bob,SK.shadow,10,1,s);
-    // Highlight topo-esq
-    px(ctx,5,5+bob,SK.hi,3,2,s);
+    // === HEAD — Screen Helmet ===
+    // Outer casing
+    px(ctx,5,4+bob,K,10,1,s); px(ctx,5,13+bob,K,10,1,s);
+    px(ctx,4,5+bob,K,1,8,s);  px(ctx,15,5+bob,K,1,8,s);
+    // Dark helmet rim (inner border)
+    px(ctx,5,5+bob,'#0d0d1e',10,1,s); px(ctx,5,12+bob,'#0d0d1e',10,1,s);
+    px(ctx,5,5+bob,'#0d0d1e',1,7,s);  px(ctx,14,5+bob,'#0d0d1e',1,7,s);
+    // Screen display
+    px(ctx,6,6+bob,SC.main,8,6,s);
+    px(ctx,6,6+bob,SC.hi,4,1,s); px(ctx,6,7+bob,SC.hi,1,2,s);
+    px(ctx,13,6+bob,SC.shadow,1,6,s); px(ctx,6,11+bob,SC.shadow,8,1,s);
+    px(ctx,12,7+bob,'#ffffff',1,1,s); // shine dot
+    // Rivets on casing sides
+    px(ctx,4,7+bob,'#222233',1,1,s); px(ctx,4,9+bob,'#222233',1,1,s); px(ctx,4,11+bob,'#222233',1,1,s);
+    px(ctx,15,7+bob,'#222233',1,1,s); px(ctx,15,9+bob,'#222233',1,1,s); px(ctx,15,11+bob,'#222233',1,1,s);
 
-    // Orelhas (1px nub)
-    px(ctx,3,7+bob,SK.ear,2,3,s);
-    px(ctx,15,7+bob,SK.ear,2,3,s);
-    px(ctx,3,8+bob,SK.shadow,1,2,s);
-
-    // Bochechas
-    px(ctx,5,10+bob,'#FF9999',2,1,s);
-    px(ctx,13,10+bob,'#FF9999',2,1,s);
-
-    drawFrontFace(ctx, opts.eyeStyle, bob, s, SK, frame);
+    drawFrontFace(ctx, opts.eyeStyle, bob, s, SC, frame);
     drawHat(ctx, opts, bob, s);
     drawAccessoryFront(ctx, opts, bob, s, B);
 
@@ -224,7 +208,7 @@ const CharRenderer = (() => {
   // ── COSTAS ────────────────────────────────────────────────────────────────
 
   function drawBack(ctx, opts, frame, s, carryBomb) {
-    const SK = SKIN_COLORS[opts.skin] || SKIN_COLORS[0];
+    const SC = SKIN_COLORS[opts.skin] || SKIN_COLORS[0];
     const B  = BODY_COLORS[opts.body] || BODY_COLORS[0];
     const P  = PANTS_COLORS[opts.pants] || PANTS_COLORS[0];
 
@@ -234,45 +218,46 @@ const CharRenderer = (() => {
     const armL = legR;
     const armR = legL;
 
-    px(ctx,5,34,K,10,1,s);
+    ctx.fillStyle='rgba(0,0,0,0.18)'; ctx.fillRect(5*s,34*s,10*s,1*s);
 
-    // Sapatos
-    px(ctx,4,30+legL+bob,K,6,3,s); px(ctx,5,30+legL+bob,'#111',4,2,s);
-    px(ctx,11,30+legR+bob,K,6,3,s); px(ctx,12,30+legR+bob,'#111',4,2,s);
+    // Boots
+    px(ctx,4,30+legL+bob,K,6,3,s); px(ctx,5,30+legL+bob,'#1a1a2e',4,2,s);
+    px(ctx,10,30+legR+bob,K,6,3,s); px(ctx,11,30+legR+bob,'#1a1a2e',4,2,s);
 
-    // Pernas
-    px(ctx,5,23+bob,K,1,8,s); px(ctx,8,23+bob,K,1,8,s);
-    px(ctx,6,23+legL+bob,P.shadow,2,7,s);
-    px(ctx,12,23+bob,K,1,8,s); px(ctx,15,23+bob,K,1,8,s);
-    px(ctx,13,23+legR+bob,P.shadow,2,7,s);
+    // Legs
+    px(ctx,4,23+bob,K,1,8,s); px(ctx,9,23+bob,K,2,8,s); px(ctx,14,23+bob,K,1,8,s);
+    px(ctx,5,23+legL+bob,P.shadow,4,7,s);
+    px(ctx,10,23+legR+bob,P.shadow,4,7,s);
 
-    // Cinto
-    px(ctx,5,22+bob,'#AA8800',10,1,s);
+    // Belt
+    px(ctx,4,22+bob,K,12,1,s); px(ctx,5,22+bob,'#AA8800',10,1,s);
 
-    // Corpo (costas — mais escuro)
+    // Torso back (darker, shows backpack)
     px(ctx,4,14+bob,K,12,1,s); px(ctx,4,22+bob,K,12,1,s);
     px(ctx,4,15+bob,K,1,7,s); px(ctx,15,15+bob,K,1,7,s);
-    px(ctx,5,15+bob,B.shadow,10,6,s);
-    px(ctx,5,15+bob,B.main,8,5,s);
+    px(ctx,5,15+bob,B.shadow,10,5,s);
+    px(ctx,5,15+bob,B.main,8,4,s);
+    // Life-support / backpack panel
+    px(ctx,7,16+bob,'#1a1a2e',6,4,s); px(ctx,8,17+bob,'#2a2a3e',4,2,s);
 
-    // Braços
-    px(ctx,2,15+bob,K,3,8,s);
-    px(ctx,2,15+armL+bob,B.shadow,2,7,s);
-    px(ctx,2,22+armL+bob,SK.shadow,2,2,s);
-    px(ctx,15,15+bob,K,3,8,s);
-    px(ctx,16,15+armR+bob,B.shadow,2,7,s);
-    px(ctx,16,22+armR+bob,SK.shadow,2,2,s);
+    // Arms
+    px(ctx,2,15+bob,K,3,8,s); px(ctx,2,15+armL+bob,B.shadow,2,7,s); px(ctx,2,22+armL+bob,B.shadow,2,2,s);
+    px(ctx,15,15+bob,K,3,8,s); px(ctx,16,15+armR+bob,B.shadow,2,7,s); px(ctx,16,22+armR+bob,B.shadow,2,2,s);
 
-    // Cabeça costas
+    // HEAD BACK — helmet casing (no screen visible)
     px(ctx,5,4+bob,K,10,1,s); px(ctx,5,13+bob,K,10,1,s);
-    px(ctx,4,5+bob,K,1,8,s); px(ctx,15,5+bob,K,1,8,s);
-    px(ctx,5,5+bob,SK.shadow,10,8,s);
-    px(ctx,5,5+bob,SK.main,9,7,s);
-    px(ctx,14,5+bob,SK.shadow,1,8,s);
-    px(ctx,5,5+bob,SK.shadow,1,2,s);
-
-    // Orelhas
-    px(ctx,3,7+bob,SK.ear,2,3,s); px(ctx,15,7+bob,SK.ear,2,3,s);
+    px(ctx,4,5+bob,K,1,8,s);  px(ctx,15,5+bob,K,1,8,s);
+    // Casing back fill
+    px(ctx,5,5+bob,'#1a1a2e',10,7,s);
+    px(ctx,6,6+bob,'#252540',8,5,s);
+    px(ctx,7,7+bob,'#2e2e50',6,3,s);
+    // Small status LED on back
+    px(ctx,8,8+bob,SC.shadow,4,2,s); px(ctx,9,9+bob,SC.main,2,1,s);
+    // Vent slits
+    px(ctx,6,9+bob,K,1,1,s); px(ctx,8,9+bob,K,1,1,s); px(ctx,10,9+bob,K,1,1,s); px(ctx,12,9+bob,K,1,1,s);
+    // Rivets
+    px(ctx,4,7+bob,'#333344',1,1,s); px(ctx,4,9+bob,'#333344',1,1,s); px(ctx,4,11+bob,'#333344',1,1,s);
+    px(ctx,15,7+bob,'#333344',1,1,s); px(ctx,15,9+bob,'#333344',1,1,s); px(ctx,15,11+bob,'#333344',1,1,s);
 
     drawHatBack(ctx, opts, bob, s);
     drawAccessoryBack(ctx, opts, bob, s, B);
@@ -283,7 +268,7 @@ const CharRenderer = (() => {
   // ── LADO ──────────────────────────────────────────────────────────────────
 
   function drawSide(ctx, opts, frame, s, carryBomb, flip) {
-    const SK = SKIN_COLORS[opts.skin] || SKIN_COLORS[0];
+    const SC = SKIN_COLORS[opts.skin] || SKIN_COLORS[0];
     const B  = BODY_COLORS[opts.body] || BODY_COLORS[0];
     const P  = PANTS_COLORS[opts.pants] || PANTS_COLORS[0];
 
@@ -293,53 +278,53 @@ const CharRenderer = (() => {
 
     if (flip) { ctx.save(); ctx.translate(20*s,0); ctx.scale(-1,1); }
 
-    px(ctx,5,34,K,8,1,s);
+    ctx.fillStyle='rgba(0,0,0,0.18)'; ctx.fillRect(5*s,34*s,10*s,1*s);
 
-    // Sapato frente
-    px(ctx,6,30+step+bob,K,6,3,s); px(ctx,7,30+step+bob,'#1a1a1a',4,2,s); px(ctx,7,30+step+bob,'#333',2,1,s);
-    // Sapato trás
-    px(ctx,5,30-step+bob,K,5,2,s); px(ctx,6,30-step+bob,'#111',3,2,s);
+    // Boot front
+    px(ctx,6,30+step+bob,K,6,3,s); px(ctx,7,30+step+bob,'#1a1a2e',4,2,s); px(ctx,7,30+step+bob,'#2a2a3e',2,1,s);
+    // Boot back
+    px(ctx,5,30-step+bob,K,5,2,s); px(ctx,6,30-step+bob,'#1a1a2e',3,2,s);
 
-    // Perna frente
+    // Leg front
     px(ctx,7,23+bob,K,1,8,s); px(ctx,11,23+bob,K,1,8,s);
     px(ctx,8,23+step+bob,P.main,3,7,s); px(ctx,10,25+step+bob,P.shadow,1,4,s);
-    // Perna trás
+    // Leg back
     px(ctx,7,23+bob,K,3,7,s); px(ctx,8,23-step+bob,P.shadow,2,7,s);
 
-    // Cinto
-    px(ctx,5,22+bob,'#AA8800',8,1,s);
+    // Belt
+    px(ctx,5,22+bob,K,8,1,s); px(ctx,6,22+bob,'#AA8800',7,1,s);
 
-    // Corpo perfil
+    // Torso side
     px(ctx,5,14+bob,K,8,1,s); px(ctx,5,22+bob,K,8,1,s);
     px(ctx,5,15+bob,K,1,7,s); px(ctx,12,15+bob,K,1,7,s);
     px(ctx,6,15+bob,B.main,6,6,s); px(ctx,6,15+bob,B.hi,6,1,s);
+    px(ctx,6,17+bob,B.shadow,6,1,s); // armor seam
     px(ctx,6,20+bob,B.shadow,6,1,s);
-    px(ctx,7,14+bob,SK.main,3,1,s);
+    // Collar
+    px(ctx,7,14+bob,B.shadow,3,1,s);
 
-    // Braço frontal (oscila)
+    // Front arm (swings)
     px(ctx,3,15+bob,K,3,8,s);
-    px(ctx,4,15+armF+bob,B.main,2,7,s);
-    px(ctx,3,22+armF+bob,SK.main,3,2,s);
-    // Braço traseiro
+    px(ctx,4,15+armF+bob,B.main,2,7,s); px(ctx,4,16+armF+bob,B.shadow,1,5,s);
+    px(ctx,3,22+armF+bob,B.shadow,3,2,s);
+    // Back arm
     px(ctx,11,15+bob,K,3,6,s); px(ctx,12,16+step+bob,B.shadow,1,5,s);
 
-    // Cabeça perfil
+    // HEAD SIDE — helmet profile
     px(ctx,5,4+bob,K,9,1,s); px(ctx,5,13+bob,K,9,1,s);
     px(ctx,4,5+bob,K,1,8,s); px(ctx,13,5+bob,K,1,8,s);
-    px(ctx,5,5+bob,SK.main,8,8,s);
-    px(ctx,12,5+bob,SK.shadow,1,8,s);
-    px(ctx,5,12+bob,SK.shadow,8,1,s);
-    px(ctx,5,5+bob,SK.hi,3,2,s);
+    // Helmet rim
+    px(ctx,5,5+bob,'#0d0d1e',9,1,s); px(ctx,5,12+bob,'#0d0d1e',9,1,s);
+    px(ctx,5,5+bob,'#0d0d1e',1,7,s); px(ctx,12,5+bob,'#0d0d1e',1,7,s);
+    // Screen (side profile — narrower)
+    px(ctx,6,6+bob,SC.main,6,6,s);
+    px(ctx,6,6+bob,SC.hi,3,1,s); px(ctx,6,7+bob,SC.hi,1,2,s);
+    px(ctx,11,6+bob,SC.shadow,1,6,s); px(ctx,6,11+bob,SC.shadow,6,1,s);
+    px(ctx,10,7+bob,'#ffffff',1,1,s);
+    // Rivets
+    px(ctx,4,7+bob,'#222233',1,1,s); px(ctx,4,9+bob,'#222233',1,1,s); px(ctx,4,11+bob,'#222233',1,1,s);
 
-    // Orelha (lado visível)
-    px(ctx,3,7+bob,SK.ear,2,3,s);
-    px(ctx,3,8+bob,SK.shadow,1,2,s);
-
-    // Bochecha
-    px(ctx,5,10+bob,'#FF9999',2,1,s);
-
-    // Rosto perfil
-    drawSideFace(ctx, opts.eyeStyle, bob, s, SK, frame);
+    drawSideFace(ctx, opts.eyeStyle, bob, s, SC, frame);
     drawHatSide(ctx, opts, bob, s);
     drawAccessoryFront(ctx, opts, bob, s, B);
 
@@ -347,16 +332,13 @@ const CharRenderer = (() => {
     if (carryBomb) drawBombAbove(ctx, 10, 2+bob, s);
   }
 
-  function drawSideFace(ctx, style, oy, s, SK, frame) {
+  function drawSideFace(ctx, style, oy, s, SC, frame) {
     const blink = frame===4;
     if(blink){ px(ctx,9,8+oy,K,2,1,s); return; }
+    // Eye (single, side view on screen)
     px(ctx,9,7+oy,K,2,3,s); px(ctx,9,7+oy,'#fff',1,2,s); px(ctx,10,8+oy,K,1,1,s);
-    // Nariz
-    px(ctx,12,10+oy,SK.shadow,1,1,s);
-    // Boca
-    px(ctx,11,11+oy,K,2,1,s);
-    // Sobrancelha
-    px(ctx,8,6+oy,K,3,1,s);
+    // Mouth
+    px(ctx,9,11+oy,K,3,1,s);
   }
 
   // ── CHAPÉUS ───────────────────────────────────────────────────────────────

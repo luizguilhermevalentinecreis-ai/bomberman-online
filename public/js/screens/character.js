@@ -60,7 +60,7 @@ const CharacterScreen = (() => {
           </div>
 
           <div class="char-section">
-            <div class="section-title">COR DA PELE</div>
+            <div class="section-title">COR DA TELA</div>
             <div class="options-grid" id="opts-skin"></div>
           </div>
 
